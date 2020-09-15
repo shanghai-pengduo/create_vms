@@ -1,0 +1,16 @@
+---
+# tasks file for roles/create_vm_from_template
+- name: Fetch the current system timestamp
+  set_fact:
+    fetch_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M') }}"
+
+- name: include vcenter info
+  include_vars:
+    dir: vars
+
+- name: remove existed vms from vm_list
+  include: modify_vm_list.yml
+
+- name: create vms 
+  include: create_vm.yml
+

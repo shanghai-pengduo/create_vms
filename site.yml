@@ -1,0 +1,7 @@
+---
+- hosts: localhost 
+  gather_facts: False
+  connection: local
+  roles: 
+    - role: create_vm_from_template
+

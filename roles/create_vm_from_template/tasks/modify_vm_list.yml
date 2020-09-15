@@ -1,0 +1,61 @@
+---
+- name: Check the vm_list is existed
+  fail: 
+    msg: "Can not found the vm_list file"
+  when: vm_list_path is not exists
+
+- name: List all vm name from vm_list
+  shell: awk '{print $1}' "{{ vm_list_path }}" | xargs
+  register: list_all_vm_name
+
+#- name: watch the result of list_all_vm_name
+#  debug: 
+#    msg: "{{ list_all_vm_name }}"
+
+- name: Gather all registered virtual machines
+  vmware_vm_info:
+    hostname: '{{ vcenter_hostname }}'
+    username: '{{ vcenter_username }}'
+    password: '{{ vcenter_password }}'
+    #folder: "/WMCN-SIT/vm/Templates"
+    validate_certs: no
+  delegate_to: localhost
+  register: vminfo
+
+#- debug:
+#    #var: vminfo
+#    var: vminfo.virtual_machines
+
+- name: Delete blank line from vm_list
+  replace: 
+    path: "{{ vm_list_path }}"
+    regexp: '(^\n)'
+    replace: ''
+
+- name: Delete the existed_vm_list when existed
+  file: 
+    path: "{{ existed_vm_list_path }}"
+    state: absent
+  when: existed_vm_list_path is exists
+
+- name: Save existed vm list
+  lineinfile: 
+    path: "{{ existed_vm_list_path }}"
+    line: "{{ item.guest_name }}"
+    state: present
+    create: yes
+  when: item.guest_name in list_all_vm_name.stdout
+  loop: "{{ vminfo.virtual_machines }}"
+
+- name: Delete existed vm from vm_list
+  lineinfile: 
+    path: "{{ vm_list_path }}"
+    regexp: "^{{ item.guest_name }}"
+    state: absent
+  when: item.guest_name in list_all_vm_name.stdout 
+  loop: "{{ vminfo.virtual_machines }}"
+
+- name: Failed when existed_vm_list existed
+  fail: 
+    msg: "Please check the ./existed_vm_list and run again after modify vm_list"
+  when: existed_vm_list_path is exists

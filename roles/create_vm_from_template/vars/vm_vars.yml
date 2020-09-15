@@ -1,0 +1,19 @@
+---
+myvms:
+
+  - vm_name: demo1
+    template_name: Template-CentOS7.8
+    cluster: cluster1
+    esxi_hostname: esxi_hostname1
+    folder_path: /
+    datastore: lun1
+    d1_size_gb: 200
+    d2_size_gb: 300
+    memory_mb: 8192
+    num_cpus: 4
+    ip: 192.168.31.10
+    gw: 192.168.31.1
+    hostname: demo1
+    domain: shinefire.com
+    vlan: vlan 99
+    version: 13

@@ -1,0 +1,17 @@
+---
+# vars file for roles/create_vm_from_template
+
+#vcenter_hostname: vcenter1.shinefire.com
+vcenter_hostname: NONE
+#vcenter_datacenter: Datacenter-SZ
+vcenter_datacenter: NONE
+
+dns1: 10.1.20.11
+#dns2: 10.1.20.12
+dns_suffix: shinefire.com
+
+# vm_list path
+vm_list_path: ./roles/create_vm_from_template/files/vm_list
+
+# existed vms list path
+existed_vm_list_path: ./existed_vm_list

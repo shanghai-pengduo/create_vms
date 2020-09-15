@@ -1,0 +1,82 @@
+---
+
+- name: exec python script to generate vars file
+  script: generate_vars.py
+  register: py_result
+
+#- name: check the py_result
+#  debug: 
+#    msg: "{{ py_result }}"
+
+- name: include new vars file
+  include_vars: 
+    dir: vars
+
+- name: Create a virtual machine from a template
+  vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ vcenter_datacenter }}"
+    #cluster: "{{ item.cluster }}"
+    esxi_hostname: "{{ item.esxi_hostname }}"
+    folder: "{{ item.folder_path }}"
+    name: "{{ item.vm_name }}"
+    state: present
+    #state: poweredon
+    template: "{{ item.template_name }}"
+    disk:
+    - size_gb: "{{ item.d1_size_gb }}"
+      type: thin
+      datastore: "{{ item.datastore }}"
+    - size_gb: "{{ item.d2_size_gb }}"
+      type: thin
+      datastore: "{{ item.datastore }}"
+    hardware:
+      memory_mb: "{{ item.memory_mb }}"
+      num_cpus: "{{ item.num_cpus }}"
+      scsi: paravirtual
+      memory_reservation_lock: True
+      hotadd_cpu: True
+      hotremove_cpu: True
+      hotadd_memory: False
+      version: "{{ item.version }}" # Hardware version of virtual machine
+    networks:
+    - name: "{{ item.vlan }}"
+      ip: "{{ item.ip }}"
+      netmask: 255.255.255.0
+      gateway: "{{ item.gw }}"
+    customization: 
+      hostname: "{{ item.hostname }}"
+      domain: "{{ item.domain }}"
+      dns_servers: 
+      - "{{ dns1 }}"
+      dns_suffix: 
+      - "{{ dns_suffix }}"
+    wait_for_customization: yes
+  with_items: "{{ myvms }}"
+  delegate_to: localhost
+  register: deploy
+
+#- debug: 
+#    msg: "{{ deploy }}"
+
+- name: restart all new vms
+  vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    name: "{{ item.vm_name }}"
+    state: restarted
+  with_items: "{{ myvms }}"
+  delegate_to: localhost
+
+- name: rename vm_list
+  command: mv "{{ vm_list_path }}" "{{ vm_list_path }}.{{ fetch_timestamp }}"
+
+- name: create vm_list file for next 
+  file: 
+    path: "{{ vm_list_path }}"
+    state: touch
