@@ -1,6 +1,15 @@
 # create_vms
 
 
+## 前提要求
+
+1. 需要在ansible server中安装Pyvmomi软件包以支持运行ansible playbook；
+```
+# yum localinstall rpms/python2-pyvmomi-6.7.3-4.el7.noarch.rpm
+```
+2. 暂未发现对ESXi的版本有要求；
+
+
 ## 功能说明
 
 1. 实现从vCenter中批量克隆指定虚拟机模板来创建虚拟机；
@@ -27,9 +36,6 @@
 4. 相关的Ansible模块则是基于pyVmomi这个用于调用VMware vSphere API的Python SDK编写，即创建虚拟机是通过调用VMware的相关API完成；
 
 
+## 使用说明
 
-## 其他说明
-
-1. 需要在ansible server中安装Pyvmomi软件包以支持运行ansible playbook；
-2. 暂未发现对ESXi的版本有要求；
 
